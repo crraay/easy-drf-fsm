@@ -12,11 +12,12 @@ def _get_transitions(instance, transition_list):
     return transition_list
 
 
-# TODO? remove model??
+# TODO remove model??
 def get_available_transitions(model, instance, user):
     # TODO check for existing state field
     # TODO check with another viewsets
     state_field = model.state.field
+    # state_field = instance.__class__.state.field
 
     data = get_available_user_FIELD_transitions(instance, user, state_field)
 

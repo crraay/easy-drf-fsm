@@ -1,3 +1,2 @@
 from .transition import TransitionSerializer
-from .proceed_transition import get_proceed_transition_serializer
-from .mixins.available_transitions import AvailableTransitionsMixin
+from .mixins import AvailableTransitionsFieldMixin, AllTransitionsFieldMixin
