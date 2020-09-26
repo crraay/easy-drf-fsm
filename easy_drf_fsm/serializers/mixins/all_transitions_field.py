@@ -6,7 +6,7 @@ from easy_drf_fsm.utils import get_all_transitions
 
 class AllTransitionsFieldMixin(metaclass=serializers.SerializerMetaclass):
     def get_all_transitions(self, instance):
-        user = self.context['request'].user
-        data = get_all_transitions(instance.__class__)
+        field = getattr(self.Meta.model, self.state_field_name).field
+        data = get_all_transitions(self.Meta.model, field)
 
         return TransitionSerializer(data, many=True).data

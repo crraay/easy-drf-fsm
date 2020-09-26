@@ -3,13 +3,11 @@ from django_fsm import FSMIntegerField, transition
 
 
 class TaskState(object):
-    # TODO избавиться от цифр
     NEW = 10
     ACTIVE = 20
     RESOLVED = 30
     CLOSED = 50
 
-    # TODO ???
     RESOLVER = {
         NEW: 'New',
         ACTIVE: 'Active',
@@ -20,14 +18,10 @@ class TaskState(object):
     CHOICES = RESOLVER.items()
 
 
-# TODO rename to simple task??
 class Task(models.Model):
     title = models.CharField(
         max_length=100,
-        # TODO check for null/blank difference
-        # blank=False
     )
-    # description = models.TextField()
     state = FSMIntegerField(
         default=TaskState.NEW,
         choices=TaskState.CHOICES,
@@ -50,7 +44,7 @@ class Task(models.Model):
         target=TaskState.ACTIVE,
         custom=({'button_name': 'Set as active'}),
     )
-    def activate(self, test, **kwargs):
+    def activate(self, **kwargs):
         pass
 
     @transition(

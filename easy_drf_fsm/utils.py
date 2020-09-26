@@ -4,6 +4,7 @@ import inspect
 
 
 # Вытаскиваем аргументы методов по сигнатуре
+# TODO убрать аргумент self в classmethod представлении
 def _get_transitions(instance, transition_list):
     for t in transition_list:
         handler = getattr(instance, t.name)
@@ -12,24 +13,13 @@ def _get_transitions(instance, transition_list):
     return transition_list
 
 
-# TODO remove model??
-def get_available_transitions(model, instance, user):
-    # TODO check for existing state field
-    # TODO check with another viewsets
-    state_field = model.state.field
-    # state_field = instance.__class__.state.field
-
-    data = get_available_user_FIELD_transitions(instance, user, state_field)
+def get_available_transitions(field, instance, user):
+    data = get_available_user_FIELD_transitions(instance, user, field)
 
     return _get_transitions(instance, list(data))
 
 
-def get_all_transitions(model):
-    # TODO check for existing state field
-    # TODO check with another viewsets
-    state_field = model.state.field
-
-    data = state_field.get_all_transitions(model)
-
+def get_all_transitions(model, field):
+    data = field.get_all_transitions(model)
 
     return _get_transitions(model, list(data))

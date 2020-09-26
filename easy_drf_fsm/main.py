@@ -2,10 +2,11 @@ from rest_framework import decorators, response, serializers
 from django_fsm import TransitionNotAllowed
 
 from .serializers import TransitionSerializer
-from .utils import get_all_transitions, get_available_transitions
+from .utils import get_available_transitions, get_all_transitions
 
 
 # TODO add additional fields(comment) param
+# TODO add pass_user_argument param
 def get_proceed_transition_serializer(
         Model,
         id_field_name='id',
@@ -44,7 +45,7 @@ def get_proceed_transition_serializer(
                     handler_name = t.name
                     break
             if not handler_name:
-                raise TransitionNotAllowed('Unavailable state')
+                raise TransitionNotAllowed('Unavailable {}'.format(state_field_name))
             handler = getattr(instance, handler_name)
 
             arguments = validated_data['arguments']
@@ -59,7 +60,6 @@ def get_proceed_transition_serializer(
 
     return ProceedTransitionSerializer
 
-# TODO check with another ViewSets
 # TODO проверить с недефолтными параметрами id, state
 # TODO use kwargs ???
 # TODO add param: proceed_method_name, av_trans_method_name
@@ -90,7 +90,8 @@ def get_viewset_mixin(
     def available_transitions(self, request, *args, **kwargs):
         user = request.user
         instance = self.get_object()
-        data = get_available_transitions(Model, instance, user)
+        field = getattr(Model, state_field_name).field
+        data = get_available_transitions(field, instance, user)
 
         return response.Response(TransitionSerializer(data, many=True).data)
 
@@ -100,11 +101,11 @@ def get_viewset_mixin(
         serializer_class=TransitionSerializer,
     )
     def all_transitions(self, request, *args, **kwargs):
-        data = get_all_transitions(Model)
+        field = getattr(Model, state_field_name).field
+        data = get_all_transitions(Model, field)
 
         return response.Response(TransitionSerializer(data, many=True).data)
 
-    # TODO проверить работоспособность при нескольких сущностях
     class Mixin(object):
         pass
 
