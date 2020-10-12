@@ -6,8 +6,8 @@ from .models import Task, Purchase
 
 task_viewset_mixin = get_viewset_mixin(
     Task,
-    show_available_transitions=True,
-    show_all_transitions=True
+    enable_available_transitions_method=True,
+    enable_all_transitions_method=True
 )
 
 
@@ -23,8 +23,10 @@ purchase_viewset_mixin = get_viewset_mixin(
     Purchase,
     id_field_name='guid',
     state_field_name='status',
-    show_available_transitions=True,
-    show_all_transitions=True,
+    proceed_method_name='action',
+    enable_available_transitions_method=True,
+    available_transitions_method_name='transitions',
+    enable_all_transitions_method=True,
     pass_user_argument=True,
 )
 

@@ -65,14 +65,17 @@ def get_proceed_transition_serializer(
     return ProceedTransitionSerializer
 
 
-# TODO add param: proceed_method_name, av_trans_method_name
 # TODO RENAME???
 def get_viewset_mixin(
         Model,
         id_field_name='id',
         state_field_name='state',
-        show_available_transitions=True,
-        show_all_transitions=False,
+        enable_proceed_method=True,
+        proceed_method_name='proceed_transition',
+        enable_available_transitions_method=False,
+        available_transitions_method_name='available_transitions',
+        enable_all_transitions_method=False,
+        all_transitions_method_name='all_transitions',
         pass_user_argument=False,
 ):
     proceed_transition_serializer = get_proceed_transition_serializer(
@@ -82,48 +85,47 @@ def get_viewset_mixin(
         pass_user_argument
     )
 
-    # TODO возвращать данные по дефолтному сериалайзеру?
-    @decorators.action(
-        detail=True,
-        methods=['PUT'],
-        serializer_class=proceed_transition_serializer,
-    )
-    def proceed_transition(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    @decorators.action(
-        detail=True,
-        methods=['GET'],
-        serializer_class=TransitionSerializer,
-    )
-    def available_transitions(self, request, *args, **kwargs):
-        user = request.user
-        instance = self.get_object()
-        field = getattr(Model, state_field_name).field
-        data = get_available_transitions(field, instance, user)
-
-        return response.Response(TransitionSerializer(data, many=True).data)
-
-    @decorators.action(
-        detail=False,
-        methods=['GET'],
-        serializer_class=TransitionSerializer,
-    )
-    def all_transitions(self, request, *args, **kwargs):
-        field = getattr(Model, state_field_name).field
-        data = get_all_transitions(Model, field)
-
-        return response.Response(TransitionSerializer(data, many=True).data)
-
     class Mixin(object):
-        pass
+        if enable_proceed_method:
+            # TODO возвращать данные по дефолтному сериалайзеру?
+            @decorators.action(
+                detail=True,
+                methods=['PUT'],
+                serializer_class=proceed_transition_serializer,
+                url_name=proceed_method_name,
+                url_path=proceed_method_name,
+            )
+            def proceed_transition_method(self, request, *args, **kwargs):
+                return self.update(request, *args, **kwargs)
 
-    setattr(Mixin, 'proceed_transition', proceed_transition)
+        if enable_available_transitions_method:
+            @decorators.action(
+                detail=True,
+                methods=['GET'],
+                serializer_class=TransitionSerializer,
+                url_name=available_transitions_method_name,
+                url_path=available_transitions_method_name,
+            )
+            def available_transitions(self, request, *args, **kwargs):
+                user = request.user
+                instance = self.get_object()
+                field = getattr(Model, state_field_name).field
+                data = get_available_transitions(field, instance, user)
 
-    if show_available_transitions:
-        setattr(Mixin, 'available_transitions', available_transitions)
+                return response.Response(TransitionSerializer(data, many=True).data)
 
-    if show_all_transitions:
-        setattr(Mixin, 'all_transitions', all_transitions)
+        if enable_all_transitions_method:
+            @decorators.action(
+                detail=False,
+                methods=['GET'],
+                serializer_class=TransitionSerializer,
+                url_name=all_transitions_method_name,
+                url_path=all_transitions_method_name,
+            )
+            def all_transitions(self, request, *args, **kwargs):
+                field = getattr(Model, state_field_name).field
+                data = get_all_transitions(Model, field)
+
+                return response.Response(TransitionSerializer(data, many=True).data)
 
     return Mixin

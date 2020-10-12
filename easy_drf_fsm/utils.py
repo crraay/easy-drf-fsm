@@ -1,14 +1,18 @@
-# TODO вынести куда-либо?
-from django_fsm import get_available_user_FIELD_transitions, get_all_FIELD_transitions
+from django_fsm import get_available_user_FIELD_transitions
 import inspect
 
 
-# Вытаскиваем аргументы методов по сигнатуре
-# TODO убрать аргумент self в classmethod представлении
+# Get method's arguments by signature
 def _get_transitions(instance, transition_list):
     for t in transition_list:
         handler = getattr(instance, t.name)
-        t.arguments = list(inspect.signature(handler).parameters.keys())
+        arguments = list(inspect.signature(handler).parameters.keys())
+
+        # if method is not bound - remove first(self) argument
+        if not hasattr(handler, '__self__'):
+            t.arguments = arguments[1:]
+        else:
+            t.arguments = arguments
 
     return transition_list
 
