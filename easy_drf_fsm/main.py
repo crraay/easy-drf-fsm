@@ -5,12 +5,12 @@ from .serializers import TransitionSerializer
 from .utils import get_available_transitions, get_all_transitions
 
 
-# TODO add additional fields(comment) param
-# TODO add pass_user_argument param
 def get_proceed_transition_serializer(
         Model,
         id_field_name='id',
         state_field_name='state',
+        # do not forget to make a keyword("by") param or **kwargs when using
+        pass_user_argument=False,
 ):
     class ProceedTransitionSerializer(serializers.ModelSerializer):
         arguments = serializers.DictField(required=False)
@@ -41,7 +41,7 @@ def get_proceed_transition_serializer(
             current_state = getattr(instance, state_field_name, None)
 
             for t in resolver_func(self.context['request'].user):
-                if t.target == new_state and t.source == current_state:
+                if t.target == new_state and (t.source == current_state or t.source == '*'):
                     handler_name = t.name
                     break
             if not handler_name:
@@ -49,7 +49,11 @@ def get_proceed_transition_serializer(
             handler = getattr(instance, handler_name)
 
             arguments = validated_data['arguments']
-            handler(user=self.context['request'].user, **arguments)
+
+            if pass_user_argument:
+                handler(by=self.context['request'].user, **arguments)
+            else:
+                handler(**arguments)
 
         def _get_resolver_func(self, instance):
             resolver_func_name = 'get_available_user_{}_transitions'.format(state_field_name)
@@ -60,8 +64,7 @@ def get_proceed_transition_serializer(
 
     return ProceedTransitionSerializer
 
-# TODO проверить с недефолтными параметрами id, state
-# TODO use kwargs ???
+
 # TODO add param: proceed_method_name, av_trans_method_name
 # TODO RENAME???
 def get_viewset_mixin(
@@ -70,8 +73,14 @@ def get_viewset_mixin(
         state_field_name='state',
         show_available_transitions=True,
         show_all_transitions=False,
+        pass_user_argument=False,
 ):
-    proceed_transition_serializer = get_proceed_transition_serializer(Model, id_field_name, state_field_name)
+    proceed_transition_serializer = get_proceed_transition_serializer(
+        Model,
+        id_field_name,
+        state_field_name,
+        pass_user_argument
+    )
 
     # TODO возвращать данные по дефолтному сериалайзеру?
     @decorators.action(

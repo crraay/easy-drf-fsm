@@ -3,7 +3,6 @@ from rest_framework import serializers
 from easy_drf_fsm.utils import get_available_transitions, get_all_transitions
 
 
-# TODO add show_arguments param
 class TransitionSerializer(serializers.Serializer):
     name = serializers.CharField()
     source = serializers.CharField()
@@ -27,4 +26,3 @@ class AllTransitionsFieldMixin(metaclass=serializers.SerializerMetaclass):
         data = get_all_transitions(self.Meta.model, field)
 
         return TransitionSerializer(data, many=True).data
-

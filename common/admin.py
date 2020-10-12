@@ -10,12 +10,14 @@ class TaskAdmin(FSMTransitionMixin, admin.ModelAdmin):
         '__str__',
     )
     fields = (
+        'id',
         'title',
         # 'description',
         'state',
         'decline_comment',
     )
     readonly_fields = (
+        'id',
         'state',
         'decline_comment',
     )
@@ -28,14 +30,18 @@ class PurchaseAdmin(FSMTransitionMixin, admin.ModelAdmin):
         '__str__',
     )
     fields = (
+        'guid',
         'title',
         # 'description',
         'status',
         'cancel_comment',
         'payment_info',
+        'last_change_by',
     )
     readonly_fields = (
+        'guid',
         'status',
         'cancel_comment',
         'payment_info',
+        'last_change_by',
     )

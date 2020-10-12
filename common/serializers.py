@@ -9,6 +9,7 @@ class TaskSerializer(
     AvailableTransitionsFieldMixin,
     AllTransitionsFieldMixin,
 ):
+    # TODO переместить в конфиг миксина
     state_field_name = 'state'
     available_transitions = serializers.SerializerMethodField()
     custom_field_name = serializers.SerializerMethodField(method_name='get_all_transitions')
@@ -43,7 +44,7 @@ class PurchaseSerializer(
     class Meta:
         model = Purchase
         fields = (
-            'id',
+            'guid',
             'title',
             'cancel_comment',
             'payment_info',

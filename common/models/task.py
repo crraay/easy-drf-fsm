@@ -35,9 +35,7 @@ class Task(models.Model):
     def __str__(self):
         return 'Task {}'.format(self.pk)
 
-    # TODO
-    # add custom fields to transitions: color
-    # add args to methods
+    # TODO add custom fields to transitions: color
     @transition(
         field=state,
         source=TaskState.NEW,
